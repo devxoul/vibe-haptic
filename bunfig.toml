@@ -1,0 +1,7 @@
+[install]
+# Use exact versions from lockfile
+exact = true
+
+[test]
+# Test configuration
+root = "."

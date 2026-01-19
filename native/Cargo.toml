@@ -1,0 +1,17 @@
+[package]
+name = "vibe-haptic-native"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+napi = { version = "2.16", features = ["napi8"] }
+napi-derive = "2.16"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation = "0.10"
+
+[build-dependencies]
+napi-build = "2.1"

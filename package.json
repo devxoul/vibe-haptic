@@ -1,0 +1,39 @@
+{
+  "name": "vibe-haptic",
+  "version": "0.1.0",
+  "author": "Jeon Suyeol",
+  "license": "MIT",
+  "type": "module",
+  "description": "Haptic feedback from your coding agents",
+  "files": [
+    "dist",
+    "native/*.node",
+    "native/index.js",
+    "native/index.d.ts",
+    ".claude-plugin",
+    "hooks"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist native/target native/*.node",
+    "build": "bun run build:native && bun build.ts",
+    "build:native": "bun run --cwd native build",
+    "dev:claude": "bun run build && claude --plugin-dir ./",
+    "dev:opencode": "bun run build && OPENCODE_CONFIG_CONTENT=\"{\\\"plugin\\\": [\\\"file://$PWD/dist/index.js\\\"]}\" opencode",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "play": "bun run src/bin/haptic.ts",
+    "prepublishOnly": "bun run build"
+  },
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.11",
+    "@napi-rs/cli": "^2.16",
+    "@types/bun": "latest",
+    "typescript": "^5.3.0"
+  }
+}

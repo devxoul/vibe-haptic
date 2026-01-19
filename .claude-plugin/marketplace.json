@@ -1,0 +1,24 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "vibe-haptic",
+  "description": "Haptic feedback plugin for Claude Code using macOS Force Touch trackpad",
+  "owner": {
+    "name": "Jeon Suyeol",
+    "url": "https://github.com/devxoul"
+  },
+  "plugins": [
+    {
+      "name": "vibe-haptic",
+      "description": "Feel tactile feedback when tasks complete or when input is needed through your MacBook's Force Touch trackpad",
+      "version": "0.1.0",
+      "author": {
+        "name": "Jeon Suyeol",
+        "url": "https://github.com/devxoul"
+      },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/devxoul/vibe-haptic",
+      "keywords": ["haptic", "feedback", "macos", "trackpad", "force-touch", "accessibility"]
+    }
+  ]
+}
