@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ${CLAUDE_PLUGIN_ROOT}/dist/bin/haptic-hook.js",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/haptic-hook.js",
             "timeout": 5000
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ${CLAUDE_PLUGIN_ROOT}/dist/bin/haptic-hook.js",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/haptic-hook.js",
             "timeout": 5000
           }
         ]

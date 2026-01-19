@@ -16,7 +16,7 @@ const result = await Bun.build({
   format: 'esm',
   splitting: true,
   sourcemap: 'linked',
-  external: ['*.node', 'zod'],
+  external: ['*.node'],
 })
 
 if (!result.success) {
@@ -43,5 +43,34 @@ for (const output of result.outputs) {
 }
 
 execSync('bunx tsc --emitDeclarationOnly --declaration --outDir dist', { stdio: 'inherit' })
+
+// Bundle hook for Claude Code marketplace (committed to git)
+const hookResult = await Bun.build({
+  entrypoints: ['src/bin/haptic-hook.ts'],
+  outdir: 'hooks',
+  target: 'node',
+  format: 'esm',
+  splitting: false,
+  minify: false,
+  external: [],
+})
+
+if (!hookResult.success) {
+  console.error('Hook bundle failed:')
+  for (const log of hookResult.logs) {
+    console.error(log)
+  }
+  process.exit(1)
+}
+
+for (const output of hookResult.outputs) {
+  if (output.path.endsWith('.js')) {
+    let content = await output.text()
+    if (content.includes('require(') && !content.includes('createRequire')) {
+      content = createRequireBanner + content
+    }
+    await Bun.write(output.path, content)
+  }
+}
 
 console.log('Build completed successfully!')
