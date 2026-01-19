@@ -49,14 +49,13 @@ Create `vibe-haptic.json` in your config directory:
 
 ```json
 {
-  "intensity": 2.0,
   "patterns": {
-    "success": { "beat": "66 44" },
-    "error": { "beat": "666 666 666" }
+    "success": { "beat": "6/1.5 6/0.8  4/0.5" },
+    "error": { "beat": "6/2.0 6/2.0 6/2.0" }
   },
   "events": {
-    "stop": "success",
-    "prompt": "tap"
+    "stop": "dopamine",
+    "prompt": "alert"
   }
 }
 ```

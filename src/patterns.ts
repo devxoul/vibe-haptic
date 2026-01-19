@@ -1,7 +1,5 @@
 import type { PatternConfig, ResolvedPattern } from './types'
-import { Actuation } from './types'
 
-export const DEFAULT_ACTUATION = Actuation.Strong
 export const DEFAULT_INTENSITY = 1.0
 
 export const DEFAULT_PATTERNS: Record<string, PatternConfig> = {
@@ -14,31 +12,20 @@ export const DEFAULT_PATTERNS: Record<string, PatternConfig> = {
 export function resolvePattern(
   nameOrBeat: string,
   patterns: Record<string, string | PatternConfig> | undefined,
-  globalActuation: number,
-  globalIntensity: number,
 ): ResolvedPattern | null {
-  const isInlineBeat = /^[3-6\s]+$/.test(nameOrBeat)
+  const isInlineBeat = /^[3-6/.\s]+$/.test(nameOrBeat)
   if (isInlineBeat) {
-    return {
-      beat: nameOrBeat,
-      actuation: globalActuation,
-      intensity: globalIntensity,
-    }
+    return { beat: nameOrBeat }
   }
 
   const userPattern = patterns?.[nameOrBeat]
   if (userPattern) {
     if (typeof userPattern === 'string') {
-      return {
-        beat: userPattern,
-        actuation: globalActuation,
-        intensity: globalIntensity,
-      }
+      return { beat: userPattern }
     }
     return {
       beat: userPattern.beat,
-      actuation: userPattern.actuation ?? globalActuation,
-      intensity: userPattern.intensity ?? globalIntensity,
+      intensity: userPattern.intensity,
     }
   }
 
@@ -46,8 +33,7 @@ export function resolvePattern(
   if (defaultPattern) {
     return {
       beat: defaultPattern.beat,
-      actuation: defaultPattern.actuation ?? globalActuation,
-      intensity: defaultPattern.intensity ?? globalIntensity,
+      intensity: defaultPattern.intensity,
     }
   }
 

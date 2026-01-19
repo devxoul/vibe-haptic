@@ -61,17 +61,6 @@ describe('HapticEngine', () => {
     expect(() => engine.trigger('quick')).not.toThrow()
   })
 
-  test('uses global actuation and intensity defaults', () => {
-    const config: HapticConfig = {
-      actuation: 5,
-      intensity: 1.5,
-      events: { stop: 'vibe' },
-    }
-    const engine = createTestEngine(config)
-
-    expect(() => engine.trigger('vibe')).not.toThrow()
-  })
-
   test('returns immediately (non-blocking)', () => {
     const config: HapticConfig = {
       events: { stop: 'dopamine' },
@@ -106,51 +95,51 @@ describe('Platform Handling', () => {
 
 describe('parseBeat', () => {
   test('parses simple actuation digits', () => {
-    const tokens = parseBeat('66', 6, 2)
+    const tokens = parseBeat('66', 1.0)
     expect(tokens).toEqual([
-      { type: 'tap', actuation: 6, intensity: 2 },
-      { type: 'tap', actuation: 6, intensity: 2 },
+      { type: 'tap', actuation: 6, intensity: 1.0 },
+      { type: 'tap', actuation: 6, intensity: 1.0 },
     ])
   })
 
   test('parses spaces as pauses', () => {
-    const tokens = parseBeat('6  6', 6, 2)
+    const tokens = parseBeat('6  6', 1.0)
     expect(tokens).toEqual([
-      { type: 'tap', actuation: 6, intensity: 2 },
+      { type: 'tap', actuation: 6, intensity: 1.0 },
       { type: 'pause', pauseCount: 2 },
-      { type: 'tap', actuation: 6, intensity: 2 },
+      { type: 'tap', actuation: 6, intensity: 1.0 },
     ])
   })
 
   test('parses actuation/intensity notation', () => {
-    const tokens = parseBeat('6/0.5', 6, 2)
+    const tokens = parseBeat('6/0.5', 1.0)
     expect(tokens).toEqual([{ type: 'tap', actuation: 6, intensity: 0.5 }])
   })
 
   test('parses mixed notation', () => {
-    const tokens = parseBeat('6/1.0 4 3/0.5', 6, 2)
+    const tokens = parseBeat('6/1.0 4 3/0.5', 2.0)
     expect(tokens).toEqual([
       { type: 'tap', actuation: 6, intensity: 1.0 },
       { type: 'pause', pauseCount: 1 },
-      { type: 'tap', actuation: 4, intensity: 2 },
+      { type: 'tap', actuation: 4, intensity: 2.0 },
       { type: 'pause', pauseCount: 1 },
       { type: 'tap', actuation: 3, intensity: 0.5 },
     ])
   })
 
   test('clamps intensity to valid range 0-2', () => {
-    const tokens = parseBeat('6/5.0 6/-1', 6, 2)
+    const tokens = parseBeat('6/5.0 6/-1', 1.0)
     expect(tokens[0].intensity).toBe(2)
     expect(tokens[2].intensity).toBe(0)
   })
 
   test('uses default intensity when no slash notation', () => {
-    const tokens = parseBeat('5', 6, 1.5)
+    const tokens = parseBeat('5', 1.5)
     expect(tokens).toEqual([{ type: 'tap', actuation: 5, intensity: 1.5 }])
   })
 
   test('handles complex pattern', () => {
-    const tokens = parseBeat('6/2.0 6/0.1  4/1.5 3/0.5', 6, 2)
+    const tokens = parseBeat('6/2.0 6/0.1  4/1.5 3/0.5', 1.0)
     expect(tokens).toEqual([
       { type: 'tap', actuation: 6, intensity: 2.0 },
       { type: 'pause', pauseCount: 1 },

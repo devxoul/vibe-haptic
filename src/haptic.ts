@@ -1,5 +1,5 @@
 import { loadConfig } from './config'
-import { DEFAULT_ACTUATION, DEFAULT_INTENSITY, resolvePattern } from './patterns'
+import { DEFAULT_INTENSITY, resolvePattern } from './patterns'
 import type { HapticConfig, HapticEvent, ResolvedPattern } from './types'
 
 const PAUSE_DELAY_MS = 100
@@ -10,7 +10,7 @@ export interface BeatToken {
   intensity?: number
   pauseCount?: number
 }
-export function parseBeat(beat: string, _defaultActuation: number, defaultIntensity: number): BeatToken[] {
+export function parseBeat(beat: string, defaultIntensity: number): BeatToken[] {
   const tokens: BeatToken[] = []
   let i = 0
 
@@ -84,8 +84,8 @@ export class HapticEngine {
         return
       }
 
-      const { beat, actuation, intensity } = pattern
-      const tokens = parseBeat(beat, actuation, intensity)
+      const { beat, intensity } = pattern
+      const tokens = parseBeat(beat, intensity ?? DEFAULT_INTENSITY)
       const module = this.nativeModule
       let i = 0
 
@@ -111,12 +111,7 @@ export class HapticEngine {
   }
 
   trigger(patternName: string): Promise<void> {
-    const pattern = resolvePattern(
-      patternName,
-      this.config.patterns,
-      this.config.actuation ?? DEFAULT_ACTUATION,
-      this.config.intensity ?? DEFAULT_INTENSITY,
-    )
+    const pattern = resolvePattern(patternName, this.config.patterns)
 
     if (pattern) {
       return this.playBeat(pattern)
