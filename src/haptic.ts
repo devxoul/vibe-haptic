@@ -1,3 +1,6 @@
+import { createRequire } from 'node:module'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { loadConfig } from './config'
 import { DEFAULT_INTENSITY, resolvePattern } from './patterns'
 import type { HapticConfig, HapticEvent, ResolvedPattern } from './types'
@@ -73,7 +76,11 @@ export class HapticEngine {
     }
 
     try {
-      this.nativeModule = require('../native')
+      // Use import.meta.url to resolve path at runtime, not build time
+      const currentDir = dirname(fileURLToPath(import.meta.url))
+      const nativePath = join(currentDir, '..', 'native', 'vibe-haptic-native.node')
+      const require = createRequire(import.meta.url)
+      this.nativeModule = require(nativePath)
     } catch {}
   }
 

@@ -16,7 +16,7 @@ const result = await Bun.build({
   format: 'esm',
   splitting: true,
   sourcemap: 'linked',
-  external: ['*.node', 'zod', '../native'],
+  external: ['*.node', 'zod'],
 })
 
 if (!result.success) {
