@@ -10,7 +10,7 @@
     {
       "name": "vibe-haptic",
       "description": "Feel tactile feedback when tasks complete or when input is needed through your MacBook's Force Touch trackpad",
-      "version": "0.1.0",
+      "version": "1.0.3",
       "author": {
         "name": "Jeon Suyeol",
         "url": "https://github.com/devxoul"

@@ -1,6 +1,6 @@
 {
   "name": "vibe-haptic",
-  "version": "0.1.0",
+  "version": "1.0.3",
   "description": "Haptic feedback for Claude Code using macOS Force Touch trackpad. Feel tactile feedback when tasks complete or when input is needed.",
   "author": {
     "name": "Jeon Suyeol",
