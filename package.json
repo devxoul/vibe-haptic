@@ -28,9 +28,7 @@
     "play": "bun run src/bin/haptic.ts",
     "prepublishOnly": "bun run build"
   },
-  "dependencies": {
-    "zod": "^4.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@biomejs/biome": "2.3.11",
     "@napi-rs/cli": "^2.16",

@@ -1,27 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { z } from 'zod'
 import type { HapticConfig, PatternConfig } from './types'
-
-const PatternConfigSchema = z.union([
-  z.string(),
-  z.object({
-    beat: z.string(),
-    intensity: z.number().min(0).max(2).optional(),
-  }),
-])
-
-const HapticConfigSchema = z.object({
-  patterns: z.record(z.string(), PatternConfigSchema).optional(),
-  events: z
-    .object({
-      stop: z.string().optional(),
-      prompt: z.string().optional(),
-    })
-    .optional(),
-})
-
-type ParsedConfig = z.infer<typeof HapticConfigSchema>
 
 export const DEFAULT_CONFIG: HapticConfig = {
   patterns: {},
@@ -40,7 +19,7 @@ export function getConfigPath(agent: 'claude' | 'opencode', scope: 'local' | 'gl
   return agent === 'claude' ? '.claude/vibe-haptic.json' : '.opencode/vibe-haptic.json'
 }
 
-function mergeConfig(base: HapticConfig, override: ParsedConfig): HapticConfig {
+function mergeConfig(base: HapticConfig, override: Partial<HapticConfig>): HapticConfig {
   return {
     patterns: { ...base.patterns, ...(override.patterns as Record<string, string | PatternConfig>) },
     events: { ...base.events, ...override.events },
@@ -54,8 +33,7 @@ export function loadConfig(agent: 'claude' | 'opencode' = 'claude'): HapticConfi
   if (existsSync(globalPath)) {
     try {
       const globalData = JSON.parse(readFileSync(globalPath, 'utf-8'))
-      const validated = HapticConfigSchema.parse(globalData)
-      config = mergeConfig(config, validated)
+      config = mergeConfig(config, globalData)
     } catch {}
   }
 
@@ -63,8 +41,7 @@ export function loadConfig(agent: 'claude' | 'opencode' = 'claude'): HapticConfi
   if (existsSync(localPath)) {
     try {
       const localData = JSON.parse(readFileSync(localPath, 'utf-8'))
-      const validated = HapticConfigSchema.parse(localData)
-      config = mergeConfig(config, validated)
+      config = mergeConfig(config, localData)
     } catch {}
   }
 
