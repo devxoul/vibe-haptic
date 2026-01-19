@@ -1,21 +1,17 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { z } from 'zod'
-import { DEFAULT_ACTUATION, DEFAULT_INTENSITY } from './patterns'
 import type { HapticConfig, PatternConfig } from './types'
 
 const PatternConfigSchema = z.union([
   z.string(),
   z.object({
     beat: z.string(),
-    actuation: z.number().min(3).max(6).optional(),
     intensity: z.number().min(0).max(2).optional(),
   }),
 ])
 
 const HapticConfigSchema = z.object({
-  actuation: z.number().min(3).max(6).optional(),
-  intensity: z.number().min(0).max(2).optional(),
   patterns: z.record(z.string(), PatternConfigSchema).optional(),
   events: z
     .object({
@@ -28,8 +24,6 @@ const HapticConfigSchema = z.object({
 type ParsedConfig = z.infer<typeof HapticConfigSchema>
 
 export const DEFAULT_CONFIG: HapticConfig = {
-  actuation: DEFAULT_ACTUATION,
-  intensity: DEFAULT_INTENSITY,
   patterns: {},
   events: {
     stop: 'vibe',
@@ -48,8 +42,6 @@ export function getConfigPath(agent: 'claude' | 'opencode', scope: 'local' | 'gl
 
 function mergeConfig(base: HapticConfig, override: ParsedConfig): HapticConfig {
   return {
-    actuation: override.actuation ?? base.actuation,
-    intensity: override.intensity ?? base.intensity,
     patterns: { ...base.patterns, ...(override.patterns as Record<string, string | PatternConfig>) },
     events: { ...base.events, ...override.events },
   }
