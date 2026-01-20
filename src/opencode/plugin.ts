@@ -30,11 +30,8 @@ export const vibeHapticPlugin = async (_ctx: PluginInput) => {
     event: async (input: { event: OpenCodeEvent }): Promise<void> => {
       const { event } = input
 
-      if (event.type === 'session.status') {
-        const statusObj = (event as SessionStatusEvent).properties.status
-        if (statusObj.type === 'idle') {
-          engine.triggerForEvent('stop')
-        }
+      if (event.type === 'session.idle') {
+        engine.triggerForEvent('stop')
       } else if (event.type === 'permission.updated' || event.type === 'question.asked') {
         engine.triggerForEvent('prompt')
       }
