@@ -2,6 +2,8 @@
 
 Haptic feedback from your coding agents.
 
+![Vibe Haptic](https://github.com/user-attachments/assets/4e80abbf-e61a-43b1-ad17-14ea8f480cdd)
+
 Get tactile feedback when your AI agent completes tasks, encounters errors, or requests input — feel the rhythm of your coding session through your MacBook's trackpad.
 
 ## How It Works
