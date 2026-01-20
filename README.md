@@ -103,8 +103,8 @@ Examples:
 
 | Pattern | Beat | Description |
 |---------|------|-------------|
-| `vibe` | `6/0.8 3/1.0   6/1.0` | Signature rhythm |
-| `alert` | `6/0.5 6/1.0 6/0.5` | Attention pulse |
+| `vibe` | `6/0.8 3/1.0   6/1.0` | Signature rhythm (default for stop event) |
+| `alert` | `6/0.5 6/1.0 6/0.5` | Attention pulse (default for prompt event) |
 | `dopamine` | `6666666 5/1.0 4/1.0 3/1.0` | Reward cascade |
 | `noise` | `6543654365436543` | Rapid texture |
 
