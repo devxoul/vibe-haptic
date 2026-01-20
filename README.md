@@ -35,7 +35,7 @@ Add to your `opencode.jsonc`:
 ```jsonc
 {
   "plugins": [
-    "vibe-haptic@1.0.4"
+    "vibe-haptic@1.0.5"
   ]
 }
 ```
