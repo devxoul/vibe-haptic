@@ -52,6 +52,8 @@ Add to your `opencode.jsonc`:
 
 ## Configuration
 
+Everything works out of the box — just install and go. But if you want to tweak the patterns or map different events, here's how.
+
 ### Configuration File
 
 Create `vibe-haptic.json` in your config directory:
