@@ -6,6 +6,16 @@ Haptic feedback from your coding agents.
 
 Get tactile feedback when your AI agent completes tasks, encounters errors, or requests input — feel the rhythm of your coding session through your MacBook's trackpad.
 
+## Why?
+
+"Why not just use system notifications?"
+
+I tried that. Banners popping up, sounds dinging — it felt noisy and annoying. Every notification pulled my eyes away from what I was doing, broke my flow, and honestly just became another thing to dismiss.
+
+I wanted something quieter. A subtle nudge that says "hey, I'm done" without screaming for attention. Something I could feel without having to look. (I'm the kind of person who always has Do Not Disturb on.)
+
+That's what haptic feedback does — it's silent, ambient, and stays out of your way until you need it.
+
 ## How It Works
 
 Modern MacBooks have a Force Touch trackpad that doesn't physically click. Instead, it uses a linear actuator (Taptic Engine) to simulate the sensation of a click through precise vibrations.
