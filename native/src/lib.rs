@@ -23,6 +23,8 @@ mod macos {
             matching: CFMutableDictionaryRef,
             existing: *mut u32,
         ) -> IOReturn;
+        pub fn IOServiceGetMatchingService(main_port: u32, matching: CFMutableDictionaryRef)
+            -> u32;
         pub fn IOIteratorNext(iterator: u32) -> u32;
         pub fn IORegistryEntryCreateCFProperty(
             entry: u32,
@@ -40,11 +42,8 @@ mod macos {
             c_str: *const i8,
             encoding: u32,
         ) -> CFStringRef;
-        pub fn CFNumberGetValue(
-            number: CFNumberRef,
-            the_type: i32,
-            value_ptr: *mut c_void,
-        ) -> bool;
+        pub fn CFNumberGetValue(number: CFNumberRef, the_type: i32, value_ptr: *mut c_void)
+            -> bool;
         pub fn CFRelease(cf: *const c_void);
         pub fn CFGetTypeID(cf: CFTypeRef) -> u64;
         pub fn CFBooleanGetTypeID() -> u64;
@@ -68,17 +67,18 @@ mod macos {
         ) -> i32;
     }
 
-    pub fn find_trackpad_device() -> Option<u64> {
+    pub fn find_all_trackpad_devices() -> Vec<(u64, bool)> {
+        let mut devices = Vec::new();
         unsafe {
             let matching = IOServiceMatching(b"AppleMultitouchDevice\0".as_ptr() as *const i8);
             if matching.is_null() {
-                return None;
+                return devices;
             }
 
             let mut iterator: u32 = 0;
             let result = IOServiceGetMatchingServices(0, matching, &mut iterator);
             if result != KERN_SUCCESS {
-                return None;
+                return devices;
             }
 
             let device_id_key = CFStringCreateWithCString(
@@ -91,8 +91,11 @@ mod macos {
                 b"ActuationSupported\0".as_ptr() as *const i8,
                 K_CF_STRING_ENCODING_UTF8,
             );
-
-            let mut found_device_id: Option<u64> = None;
+            let builtin_key = CFStringCreateWithCString(
+                ptr::null(),
+                b"MT Built-In\0".as_ptr() as *const i8,
+                K_CF_STRING_ENCODING_UTF8,
+            );
 
             loop {
                 let service = IOIteratorNext(iterator);
@@ -127,48 +130,124 @@ mod macos {
                             K_CF_NUMBER_SINT64_TYPE,
                             &mut device_id as *mut i64 as *mut c_void,
                         ) {
-                            found_device_id = Some(device_id as u64);
+                            let builtin_ref = IORegistryEntryCreateCFProperty(
+                                service,
+                                builtin_key,
+                                ptr::null(),
+                                0,
+                            );
+                            let is_builtin = if !builtin_ref.is_null() {
+                                let is_boolean = CFGetTypeID(builtin_ref) == CFBooleanGetTypeID();
+                                let result = if is_boolean {
+                                    CFBooleanGetValue(builtin_ref)
+                                } else {
+                                    false
+                                };
+                                CFRelease(builtin_ref);
+                                result
+                            } else {
+                                // Assume built-in if property is missing
+                                true
+                            };
+
+                            devices.push((device_id as u64, is_builtin));
                         }
                         CFRelease(device_id_ref);
                     }
                 }
 
                 IOObjectRelease(service);
-
-                if found_device_id.is_some() {
-                    break;
-                }
             }
 
             CFRelease(device_id_key as *const c_void);
             CFRelease(actuation_key as *const c_void);
+            CFRelease(builtin_key as *const c_void);
             IOObjectRelease(iterator);
-
-            found_device_id
         }
+        devices
+    }
+
+    pub fn is_clamshell_closed() -> bool {
+        unsafe {
+            let matching = IOServiceMatching(b"IOPMrootDomain\0".as_ptr() as *const i8);
+            if matching.is_null() {
+                return false;
+            }
+
+            let service = IOServiceGetMatchingService(0, matching);
+            if service == IO_OBJECT_NULL {
+                return false;
+            }
+
+            let key = CFStringCreateWithCString(
+                ptr::null(),
+                b"AppleClamshellState\0".as_ptr() as *const i8,
+                K_CF_STRING_ENCODING_UTF8,
+            );
+
+            let clamshell_ref = IORegistryEntryCreateCFProperty(service, key, ptr::null(), 0);
+            let is_closed = if !clamshell_ref.is_null() {
+                let is_boolean = CFGetTypeID(clamshell_ref) == CFBooleanGetTypeID();
+                let result = if is_boolean {
+                    CFBooleanGetValue(clamshell_ref)
+                } else {
+                    false
+                };
+                CFRelease(clamshell_ref);
+                result
+            } else {
+                false
+            };
+
+            CFRelease(key as *const c_void);
+            IOObjectRelease(service);
+
+            is_closed
+        }
+    }
+
+    pub fn select_trackpad_device() -> Option<u64> {
+        let devices = find_all_trackpad_devices();
+        if devices.is_empty() {
+            return None;
+        }
+
+        if is_clamshell_closed() {
+            // Prefer external trackpad when lid is closed
+            if let Some(&(id, _)) = devices.iter().find(|(_, builtin)| !builtin) {
+                return Some(id);
+            }
+        }
+
+        // Prefer built-in when lid is open, or fallback to any available
+        if let Some(&(id, _)) = devices.iter().find(|(_, builtin)| *builtin) {
+            return Some(id);
+        }
+
+        Some(devices[0].0)
     }
 }
 
 #[cfg(not(target_os = "macos"))]
-fn find_trackpad_device() -> Option<u64> {
+fn select_trackpad_device() -> Option<u64> {
     None
 }
 
 #[cfg(target_os = "macos")]
-fn find_trackpad_device() -> Option<u64> {
-    macos::find_trackpad_device()
+fn select_trackpad_device() -> Option<u64> {
+    macos::select_trackpad_device()
 }
 
 #[napi]
 pub fn is_supported() -> bool {
-    find_trackpad_device().is_some()
+    select_trackpad_device().is_some()
 }
 
 #[napi]
 pub fn actuate(actuation_id: u32, intensity: f64) -> Result<()> {
     #[cfg(target_os = "macos")]
     {
-        let device_id = find_trackpad_device()
+        let device_id = select_trackpad_device()
             .ok_or_else(|| Error::from_reason("No supported trackpad found"))?;
 
         unsafe {
@@ -191,7 +270,9 @@ pub fn actuate(actuation_id: u32, intensity: f64) -> Result<()> {
     }
     #[cfg(not(target_os = "macos"))]
     {
-        Err(Error::from_reason("Haptic feedback only supported on macOS"))
+        Err(Error::from_reason(
+            "Haptic feedback only supported on macOS",
+        ))
     }
 }
 
