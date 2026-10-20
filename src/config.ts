@@ -27,9 +27,12 @@ function mergeConfig(base: HapticConfig, override: Partial<HapticConfig>): Hapti
 }
 
 export function loadConfig(agent: 'claude' | 'opencode' = 'claude'): HapticConfig {
+  return loadConfigFromPaths(getConfigPath(agent, 'global'), getConfigPath(agent, 'local'))
+}
+
+export function loadConfigFromPaths(globalPath: string, localPath: string): HapticConfig {
   let config: HapticConfig = { ...DEFAULT_CONFIG }
 
-  const globalPath = getConfigPath(agent, 'global')
   if (existsSync(globalPath)) {
     try {
       const globalData = JSON.parse(readFileSync(globalPath, 'utf-8'))
@@ -37,7 +40,6 @@ export function loadConfig(agent: 'claude' | 'opencode' = 'claude'): HapticConfi
     } catch {}
   }
 
-  const localPath = getConfigPath(agent, 'local')
   if (existsSync(localPath)) {
     try {
       const localData = JSON.parse(readFileSync(localPath, 'utf-8'))
