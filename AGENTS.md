@@ -25,6 +25,18 @@ bun run typecheck
 bun run lint
 ```
 
+## Release
+
+Use the **Release** GitHub Actions workflow (`workflow_dispatch`, see `.github/workflows/release.yml`). It typechecks, lints, tests, bumps the version in `package.json` / `.claude-plugin/plugin.json` / `README.md`, rebuilds the native module and hook bundle, commits, tags, publishes to npm with provenance, and creates a GitHub Release. Tags have no `v` prefix.
+
+### Version Decision
+
+- If the user specifies an exact version (e.g., `1.5.0`), use it as-is.
+  Otherwise, decide the bump level from the changes since the last release (never bump major unless the user explicitly asks):
+  - **minor** — New features, new agent support, new events or config options, breaking changes
+  - **patch** — Bug fixes, refactors, docs, dependency updates, minor improvements
+- Never ask the user which version to bump. Decide and proceed.
+
 ## Testing with AI Agents
 
 This project is a plugin for AI coding agents. To test changes interactively:

@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version (x.y.z)"
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    # The native module links macOS MultitouchSupport.framework
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Validate version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version: '$VERSION' (expected x.y.z)"
+            exit 1
+          fi
+
+      - name: Resume from existing tag
+        # Version tags are immutable. If this version was already tagged (a rerun after a
+        # failed publish, or a re-dispatch), publish from the tagged commit instead of
+        # cutting a new release commit.
+        id: tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          git fetch --tags --force origin
+          if git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
+            git checkout --detach "refs/tags/$VERSION"
+            actual=$(node -p "require('./package.json').version")
+            if [ "$actual" != "$VERSION" ]; then
+              echo "::error::Tag $VERSION points at package.json version $actual"
+              exit 1
+            fi
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Test
+        run: bun test
+
+      - name: Bump version
+        if: steps.tag.outputs.exists == 'false'
+        run: |
+          npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
+          bun -e "
+            const fs = require('fs');
+            const v = '${{ inputs.version }}';
+            const plugin = JSON.parse(fs.readFileSync('.claude-plugin/plugin.json', 'utf8'));
+            plugin.version = v;
+            fs.writeFileSync('.claude-plugin/plugin.json', JSON.stringify(plugin, null, 2) + '\n');
+            let readme = fs.readFileSync('README.md', 'utf8');
+            readme = readme.replace(/vibe-haptic@[\d.]+/g, 'vibe-haptic@' + v);
+            fs.writeFileSync('README.md', readme);
+          "
+
+      - name: Build
+        run: bun run clean && bun run build
+
+      - name: Commit and tag
+        if: steps.tag.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json .claude-plugin/plugin.json README.md hooks native/*.node
+          git diff --staged --quiet || git commit -m "${{ inputs.version }}"
+          git tag "${{ inputs.version }}"
+          git push --atomic origin HEAD:main "refs/tags/${{ inputs.version }}"
+
+      - name: Publish to npm
+        run: |
+          if [ -n "$(npm view vibe-haptic@${{ inputs.version }} version 2>/dev/null || true)" ]; then
+            echo "vibe-haptic@${{ inputs.version }} already published, skipping"
+          else
+            npm publish --provenance --access public
+          fi
+
+      - name: Create GitHub Release
+        run: |
+          if gh release view "${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "Release ${{ inputs.version }} already exists, skipping"
+          else
+            gh release create "${{ inputs.version }}" --title "${{ inputs.version }}" --generate-notes
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
