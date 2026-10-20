@@ -147,6 +147,42 @@ mod macos {
             found_device_id
         }
     }
+
+    pub fn is_lid_closed() -> bool {
+        unsafe {
+            let matching = IOServiceMatching(b"IOPMrootDomain\0".as_ptr() as *const i8);
+            if matching.is_null() {
+                return false;
+            }
+
+            let mut iterator: u32 = 0;
+            if IOServiceGetMatchingServices(0, matching, &mut iterator) != KERN_SUCCESS {
+                return false;
+            }
+
+            let service = IOIteratorNext(iterator);
+            IOObjectRelease(iterator);
+            if service == IO_OBJECT_NULL {
+                return false;
+            }
+
+            let key = CFStringCreateWithCString(
+                ptr::null(),
+                b"AppleClamshellState\0".as_ptr() as *const i8,
+                K_CF_STRING_ENCODING_UTF8,
+            );
+            let value = IORegistryEntryCreateCFProperty(service, key, ptr::null(), 0);
+            CFRelease(key as *const c_void);
+            IOObjectRelease(service);
+
+            if value.is_null() {
+                return false;
+            }
+            let closed = CFGetTypeID(value) == CFBooleanGetTypeID() && CFBooleanGetValue(value);
+            CFRelease(value);
+            closed
+        }
+    }
 }
 
 #[cfg(not(target_os = "macos"))]
@@ -162,6 +198,18 @@ fn find_trackpad_device() -> Option<u64> {
 #[napi]
 pub fn is_supported() -> bool {
     find_trackpad_device().is_some()
+}
+
+#[napi]
+pub fn is_lid_closed() -> bool {
+    #[cfg(target_os = "macos")]
+    {
+        macos::is_lid_closed()
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        false
+    }
 }
 
 #[napi]

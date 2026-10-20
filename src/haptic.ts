@@ -51,7 +51,10 @@ export function parseBeat(beat: string, defaultIntensity: number): BeatToken[] {
   return tokens
 }
 
-export type NativeModule = { actuate: (actuation: number, intensity: number) => void }
+export type NativeModule = {
+  actuate: (actuation: number, intensity: number) => void
+  isLidClosed?: () => boolean
+}
 
 export interface HapticEngineOptions {
   nativeModule?: NativeModule | null
@@ -86,7 +89,7 @@ export class HapticEngine {
 
   playBeat(pattern: ResolvedPattern): Promise<void> {
     return new Promise((resolve) => {
-      if (!this.nativeModule) {
+      if (!this.nativeModule || this.nativeModule.isLidClosed?.()) {
         resolve()
         return
       }

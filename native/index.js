@@ -3,6 +3,7 @@ const nativeModule = require(path.join(__dirname, 'vibe-haptic-native.node'))
 
 module.exports = {
   isSupported: nativeModule.isSupported,
+  isLidClosed: nativeModule.isLidClosed,
   actuate: nativeModule.actuate,
   click: nativeModule.click,
   weakClick: nativeModule.weakClick,

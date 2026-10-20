@@ -93,6 +93,22 @@ describe('Platform Handling', () => {
   })
 })
 
+describe('Lid State', () => {
+  test('skips actuation when lid is closed', async () => {
+    let calls = 0
+    const engine = new HapticEngine({}, { nativeModule: { actuate: () => calls++, isLidClosed: () => true } })
+    await engine.playBeat({ beat: '66' })
+    expect(calls).toBe(0)
+  })
+
+  test('actuates when lid is open', async () => {
+    let calls = 0
+    const engine = new HapticEngine({}, { nativeModule: { actuate: () => calls++, isLidClosed: () => false } })
+    await engine.playBeat({ beat: '66' })
+    expect(calls).toBe(2)
+  })
+})
+
 describe('parseBeat', () => {
   test('parses simple actuation digits', () => {
     const tokens = parseBeat('66', 1.0)
