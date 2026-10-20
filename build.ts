@@ -5,6 +5,7 @@ const entrypoints = [
   'src/index.ts',
   'src/claude/index.ts',
   'src/opencode/index.ts',
+  'src/pi/index.ts',
   'src/bin/haptic.ts',
   'src/bin/haptic-hook.ts',
 ]
@@ -16,7 +17,7 @@ const result = await Bun.build({
   format: 'esm',
   splitting: true,
   sourcemap: 'linked',
-  external: ['*.node'],
+  external: ['*.node', '@mariozechner/pi-coding-agent'],
 })
 
 if (!result.success) {

@@ -50,6 +50,14 @@ Add to your `opencode.jsonc`:
 }
 ```
 
+### pi
+
+```bash
+pi install npm:vibe-haptic
+```
+
+This also works with pi-based agents such as [omo](https://github.com/code-yeongyu/senpi).
+
 ## Configuration
 
 Everything works out of the box — just install and go. But if you want to tweak the patterns or map different events, here's how.
@@ -60,6 +68,7 @@ Create `vibe-haptic.json` in your config directory:
 
 - **Claude Code**: `~/.claude/vibe-haptic.json` or `.claude/vibe-haptic.json`
 - **OpenCode**: `~/.config/opencode/vibe-haptic.json` or `.opencode/vibe-haptic.json`
+- **pi**: `~/.pi/agent/vibe-haptic.json` or `.pi/vibe-haptic.json` (pi-based agents use their own config directory, e.g. `~/.omo/agent/vibe-haptic.json`)
 
 ```json
 {
@@ -78,16 +87,17 @@ Create `vibe-haptic.json` in your config directory:
 
 Events map agent actions to haptic patterns:
 
-| Event | Trigger | Claude Code | OpenCode |
-|-------|---------|-------------|----------|
-| `stop` | Agent finishes and becomes idle | ✓ | ✓ |
-| `prompt` | Agent asks for input (select option, permission, etc.) | ✓ | ✓ |
+| Event | Trigger | Claude Code | OpenCode | pi |
+|-------|---------|-------------|----------|----|
+| `stop` | Agent finishes and becomes idle | ✓ | ✓ | ✓ |
+| `prompt` | Agent asks for input (select option, permission, etc.) | ✓ | ✓ | |
 
 #### Trigger Details
 
 **`stop` event** — Fires when the agent completes its work:
 - **Claude Code**: Triggered by the `Stop` hook event when the agent finishes responding
 - **OpenCode**: Triggered when session status changes to `idle`
+- **pi**: Triggered by the `agent_end` event (interactive sessions only)
 
 **`prompt` event** — Fires when the agent needs your attention:
 - **Claude Code**: Triggered by `Notification` hook events (permission requests, tool approvals, etc.)
