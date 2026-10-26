@@ -7,14 +7,7 @@
     "url": "https://github.com/devxoul"
   },
   "license": "MIT",
-  "keywords": [
-    "haptic",
-    "feedback",
-    "macos",
-    "trackpad",
-    "force-touch",
-    "accessibility"
-  ],
+  "keywords": ["haptic", "feedback", "macos", "trackpad", "force-touch", "accessibility"],
   "homepage": "https://github.com/devxoul/vibe-haptic",
   "repository": "https://github.com/devxoul/vibe-haptic"
 }
