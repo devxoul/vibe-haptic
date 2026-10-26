@@ -84,6 +84,8 @@ jobs:
             readme = readme.replace(/vibe-haptic@[\d.]+/g, 'vibe-haptic@' + v);
             fs.writeFileSync('README.md', readme);
           "
+          # JSON.stringify expands arrays that biome keeps inline, which fails lint on resumed runs
+          bunx biome format --write .claude-plugin/plugin.json
 
       - name: Build
         run: bun run clean && bun run build
