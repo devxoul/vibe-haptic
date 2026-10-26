@@ -3,6 +3,10 @@
   "version": "1.2.2",
   "author": "Jeon Suyeol",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devxoul/vibe-haptic"
+  },
   "type": "module",
   "description": "Haptic feedback from your coding agents",
   "main": "./dist/index.js",
