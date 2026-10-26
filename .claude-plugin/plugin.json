@@ -1,13 +1,20 @@
 {
   "name": "vibe-haptic",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Haptic feedback for Claude Code using macOS Force Touch trackpad. Feel tactile feedback when tasks complete or when input is needed.",
   "author": {
     "name": "Jeon Suyeol",
     "url": "https://github.com/devxoul"
   },
   "license": "MIT",
-  "keywords": ["haptic", "feedback", "macos", "trackpad", "force-touch", "accessibility"],
+  "keywords": [
+    "haptic",
+    "feedback",
+    "macos",
+    "trackpad",
+    "force-touch",
+    "accessibility"
+  ],
   "homepage": "https://github.com/devxoul/vibe-haptic",
   "repository": "https://github.com/devxoul/vibe-haptic"
 }
